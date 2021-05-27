@@ -5,6 +5,8 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"io"
+	"os"
 
 	"log"
 
@@ -12,22 +14,31 @@ import (
 	//	"google.golang.org/api/iterator"
 )
 
-/*func GetObject(id, bucketName string) string {
-	object := ""
-
+func GetObject(objectName, bucketName string) {
 	ctx := context.Background()
 
-	client := getConnection(ctx)
+	client, err := storage.NewClient(ctx)
 
-	bucket := client.Bucket(bucketName)
+	defer client.Close()
 
-	storageObjHdl := bucket.Object(id)
-
-	if storageObjHdl != nil {
-		return object
+	if err != nil {
+		panic(err.Error())
 	}
 
-	log.Println(storageObjHdl)
+	bucket := client.Bucket(bucketName)
+	objBucket := bucket.Object(objectName)
+
+	reader, errorReader := objBucket.NewReader(ctx)
+	if errorReader != nil {
+		panic(err)
+	}
+
+	defer reader.Close()
+
+	if _, err := io.Copy(os.Stdout, reader); err != nil {
+		panic(err)
+	}
+
 	/*
 		//query := &storage.Query{Prefix: id}
 
@@ -52,21 +63,8 @@ import (
 		//it := bkt.Objects(ctx, query)
 
 
-	return object
+	return object*/
 
-}*/
-
-func getConnection(ctx context.Context) *storage.Client {
-
-	client, err := storage.NewClient(ctx)
-
-	defer client.Close()
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return client
 }
 
 func WriteObject(i interface{}, bucketName, objectName string) {
