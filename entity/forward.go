@@ -1,7 +1,6 @@
 package entity
 
 type Rule struct {
-	HasAttachment bool `yaml:"has_attachment,omitempty"`
 }
 
 type DataObject struct {
@@ -13,5 +12,5 @@ type Forward struct {
 	Value   string `yaml:"value"`
 	Content string `yaml:"content,omitempty"`
 	Rules   []Rule `yaml:"rules,omitempty"`
-	Assign  string `yaml:"assign,omitempty"`
+	Squad   string `yaml:"squad,omitempty"`
 }
