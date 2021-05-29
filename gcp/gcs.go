@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"google.golang.org/api/iterator"
 	"gopkg.in/yaml.v2"
 
 	"log"
@@ -16,16 +17,7 @@ import (
 	//	"google.golang.org/api/iterator"
 )
 
-func GetObject(bucketName, objectName string, dataObject *entity.DataObject) {
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-
-	defer client.Close()
-
-	if err != nil {
-		panic(err.Error())
-	}
+/*func getObject(bucketName, objectName string, dataObject *entity.DataObject) {
 
 	bucket := client.Bucket(bucketName)
 	objBucket := bucket.Object(objectName)
@@ -43,7 +35,7 @@ func GetObject(bucketName, objectName string, dataObject *entity.DataObject) {
 
 	writer.ReadFrom(reader)
 
-	errUnmarsh := yaml.Unmarshal(b.Bytes(), &dataObject)
+	errUnmarsh := yaml.UnmarshalStrict(b.Bytes(), &dataObject)
 
 	if errUnmarsh != nil {
 		log.Fatal("Erro no unmarshal\n", errUnmarsh.Error())
@@ -73,8 +65,69 @@ func GetObject(bucketName, objectName string, dataObject *entity.DataObject) {
 		//it := bkt.Objects(ctx, query)
 
 
-	return object*/
+	return object
 
+}*/
+
+func GetObjects(bucketName string) []entity.DataObject {
+	var dataObjects []entity.DataObject
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+
+	defer client.Close()
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	bucket := client.Bucket(bucketName)
+	it := bucket.Objects(ctx, nil)
+
+	for {
+
+		attr, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			panic(err)
+		}
+
+		dataObject := getObject(attr.Name, bucket, ctx)
+
+		dataObjects = append(dataObjects, dataObject)
+	}
+
+	return dataObjects
+}
+
+func getObject(objectName string, bucket *storage.BucketHandle, ctx context.Context) entity.DataObject {
+	var dataObject entity.DataObject
+
+	objBucket := bucket.Object(objectName)
+	reader, errorReader := objBucket.NewReader(ctx)
+
+	if errorReader != nil {
+		log.Fatal("Erro na criação de reader, ", errorReader.Error())
+		panic(errorReader)
+	}
+
+	defer reader.Close()
+
+	var b bytes.Buffer
+	writer := bufio.NewWriter(&b)
+
+	writer.ReadFrom(reader)
+
+	errUnmarsh := yaml.UnmarshalStrict(b.Bytes(), &dataObject)
+
+	if errUnmarsh != nil {
+		log.Fatal("Erro no unmarshal\n", errUnmarsh.Error())
+	}
+
+	return dataObject
 }
 
 func WriteObject(i interface{}, bucketName, objectName string) {

@@ -10,8 +10,8 @@ type DataObject struct {
 
 type Forward struct {
 	Name    string `yaml:"name,omitempty"`
-	Value   string `yaml: "value,omitempty"`
-	Content string `yaml: "content,omitempty"`
-	Rules   []Rule `yaml: "rule,omitempty"`
-	Assign  string `yaml: "assign,omitempty"`
+	Value   string `yaml:"value"`
+	Content string `yaml:"content,omitempty"`
+	Rules   []Rule `yaml:"rules,omitempty"`
+	Assign  string `yaml:"assign,omitempty"`
 }
