@@ -3,74 +3,19 @@ package gcp
 import (
 	"bufio"
 	"bytes"
-	"compress/gzip"
 	"context"
 	"encoding/json"
 
 	"google.golang.org/api/iterator"
-	"gopkg.in/yaml.v2"
 
 	"log"
 
 	"cloud.google.com/go/storage"
-	"github.com/GrooveCommunity/glib-cloud-storage/entity"
-	//	"google.golang.org/api/iterator"
 )
 
-/*func getObject(bucketName, objectName string, dataObject *entity.DataObject) {
+func GetObjects(bucketName string) [][]byte {
+	var dataObjects [][]byte
 
-	bucket := client.Bucket(bucketName)
-	objBucket := bucket.Object(objectName)
-
-	reader, errorReader := objBucket.NewReader(ctx)
-	if errorReader != nil {
-		log.Fatal("Erro na criação de reader, ", errorReader.Error())
-		panic(err)
-	}
-
-	defer reader.Close()
-
-	var b bytes.Buffer
-	writer := bufio.NewWriter(&b)
-
-	writer.ReadFrom(reader)
-
-	errUnmarsh := yaml.UnmarshalStrict(b.Bytes(), &dataObject)
-
-	if errUnmarsh != nil {
-		log.Fatal("Erro no unmarshal\n", errUnmarsh.Error())
-	}
-
-	/*
-		//query := &storage.Query{Prefix: id}
-
-		rdr, err := bucket.Object(id).NewReader(ctx)
-
-		defer rdr.Close()
-
-		if err != nil {
-			panic(err)
-		}
-
-		b, err := io.ReadAll(rdr)
-
-		if err != nil {
-			panic(err)
-		}
-
-		log.Println(string(b))
-
-		//var bucket
-
-		//it := bkt.Objects(ctx, query)
-
-
-	return object
-
-}*/
-
-func GetObjects(bucketName string) []entity.DataObject {
-	var dataObjects []entity.DataObject
 	ctx := context.Background()
 
 	client, err := storage.NewClient(ctx)
@@ -95,17 +40,13 @@ func GetObjects(bucketName string) []entity.DataObject {
 			panic(err)
 		}
 
-		dataObject := getObject(attr.Name, bucket, ctx)
-
-		dataObjects = append(dataObjects, dataObject)
+		dataObjects = append(dataObjects, getObject(attr.Name, bucket, ctx))
 	}
 
 	return dataObjects
 }
 
-func getObject(objectName string, bucket *storage.BucketHandle, ctx context.Context) entity.DataObject {
-	var dataObject entity.DataObject
-
+func getObject(objectName string, bucket *storage.BucketHandle, ctx context.Context) []byte {
 	objBucket := bucket.Object(objectName)
 	reader, errorReader := objBucket.NewReader(ctx)
 
@@ -121,13 +62,7 @@ func getObject(objectName string, bucket *storage.BucketHandle, ctx context.Cont
 
 	writer.ReadFrom(reader)
 
-	errUnmarsh := yaml.UnmarshalStrict(b.Bytes(), &dataObject)
-
-	if errUnmarsh != nil {
-		log.Fatal("Erro no unmarshal\n", errUnmarsh.Error())
-	}
-
-	return dataObject
+	return b.Bytes()
 }
 
 func WriteObject(i interface{}, bucketName, objectName string) {
@@ -154,12 +89,6 @@ func WriteObject(i interface{}, bucketName, objectName string) {
 		panic(err)
 	}
 
-	var b bytes.Buffer
-	writ := gzip.NewWriter(&b)
-	writ.Write(bI)
-	writ.Close()
-
-	w.Write(b.Bytes())
+	w.Write(bI)
 	w.Close()
-
 }
