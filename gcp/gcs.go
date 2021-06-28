@@ -46,6 +46,21 @@ func GetObjects(bucketName string) [][]byte {
 	return dataObjects
 }
 
+func GetObject(bucketName, objectName string) []byte {
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	defer client.Close()
+
+	if err != nil {
+		panic(err)
+	}
+
+	bucket := client.Bucket(bucketName)
+
+	return getObject(objectName, bucket, ctx)
+}
+
 func getObject(objectName string, bucket *storage.BucketHandle, ctx context.Context) []byte {
 	objBucket := bucket.Object(objectName)
 	reader, errorReader := objBucket.NewReader(ctx)
