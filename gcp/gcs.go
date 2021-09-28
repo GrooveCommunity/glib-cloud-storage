@@ -83,17 +83,21 @@ func getObject(objectName string, bucket *storage.BucketHandle, ctx context.Cont
 func WriteObject(i interface{}, bucketName, objectName string) {
 	ctx := context.Background()
 
+	log.Print("Criando client")
+
 	client, err := storage.NewClient(ctx)
 
 	defer client.Close()
 
 	if err != nil {
+
+		log.Printf("Erro criando client %v", err)
 		panic(err.Error())
 	}
 
 	bkt := client.Bucket(bucketName)
 	obj := bkt.Object(objectName)
-
+	log.Printf("Enviando arquivo %s para bucket %s", objectName, bucketName)
 	w := obj.NewWriter(ctx)
 
 	bI, err := json.Marshal(i)
@@ -106,4 +110,5 @@ func WriteObject(i interface{}, bucketName, objectName string) {
 
 	w.Write(bI)
 	w.Close()
+	log.Print("Arquivo enviado")
 }
