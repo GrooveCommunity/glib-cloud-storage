@@ -108,7 +108,20 @@ func WriteObject(i interface{}, bucketName, objectName string) {
 		panic(err)
 	}
 
-	w.Write(bI)
-	w.Close()
+	_, err = w.Write(bI)
+
+	if err != nil {
+		log.Println("Erro gravando o arquivo: " + err.Error())
+
+		panic(err)
+	}
+
+	err = w.Close()
+
+	if err != nil {
+		log.Println("Finalizando a gravação do arquivo: " + err.Error())
+
+		panic(err)
+	}
 	log.Print("Arquivo enviado")
 }
